@@ -26,11 +26,11 @@ VERSION = "2.5.1"
 setup(
     version=VERSION,
     name="thingsboard-gateway",
-    author="ThingsBoard",
+    author="THingsboard & Netcad Innovation Labs",
     author_email="info@thingsboard.io",
     license="Apache Software License (Apache Software License 2.0)",
     description="Thingsboard Gateway for IoT devices.",
-    url="https://github.com/thingsboard/thingsboard-gateway",
+    url="https://github.com/netcadlabs/thingsboard-gateway",
     long_description=long_description,
     long_description_content_type="text/markdown",
     include_package_data=True,
@@ -56,7 +56,7 @@ setup(
         'simplejson',
         'requests'
     ],
-    download_url='https://github.com/thingsboard/thingsboard-gateway/archive/%s.tar.gz' % VERSION,
+    download_url='https://github.com/netcadlabs/thingsboard-gateway/archive/%s.tar.gz' % VERSION,
     entry_points={
         'console_scripts': [
             'thingsboard-gateway = thingsboard_gateway.tb_gateway:daemon'
