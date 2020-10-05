@@ -139,8 +139,13 @@ class TBGatewayMqttClient(TBDeviceMqttClient):
             telemetry = [telemetry]
         return self.publish_data({device: telemetry}, GATEWAY_MAIN_TOPIC + "telemetry", quality_of_service, )
 
-    def gw_connect_device(self, device_name, device_type):
-        info = self._client.publish(topic=GATEWAY_MAIN_TOPIC + "connect", payload=dumps({"device": device_name, "type": device_type}), qos=self.quality_of_service)
+    def gw_connect_device(self, device_name, device_type, extra_kv=None):
+        payload = {"device": device_name, "type": device_type}
+        if extra_kv is not None:
+            for key in extra_kv:
+                if str(extra_kv) is not str("device") and str(extra_kv) is not str("type") and extra_kv.get(key, None) is not None:
+                    payload[key] = extra_kv[key]
+        info = self._client.publish(topic=GATEWAY_MAIN_TOPIC + "connect", payload=dumps(payload), qos=self.quality_of_service)
         self.__connected_devices.add(device_name)
         # if self.gateway:
         #     self.gateway.on_device_connected(device_name, self.__devices_server_side_rpc_request_handler)

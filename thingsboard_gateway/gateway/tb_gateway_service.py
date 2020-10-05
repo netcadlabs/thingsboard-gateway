@@ -617,16 +617,16 @@ class TBGatewayService:
             summary_messages.update(**telemetry)
         return summary_messages
 
-    def add_device(self, device_name, content, wait_for_publish=False, device_type=None):
+    def add_device(self, device_name, content, wait_for_publish=False, device_type=None, device_capabilities=None):
         if device_name not in self.__saved_devices:
             device_type = device_type if device_type is not None else 'default'
             self.__connected_devices[device_name] = {**content, "device_type": device_type}
             self.__saved_devices[device_name] = {**content, "device_type": device_type}
             self.__save_persistent_devices()
         if wait_for_publish:
-            self.tb_client.client.gw_connect_device(device_name, device_type).wait_for_publish()
+            self.tb_client.client.gw_connect_device(device_name, device_type, {"capabilities" : device_capabilities}).wait_for_publish()
         else:
-            self.tb_client.client.gw_connect_device(device_name, device_type)
+            self.tb_client.client.gw_connect_device(device_name, device_type, {"capabilities" : device_capabilities})
 
     def update_device(self, device_name, event, content):
         if event == 'connector' and self.__connected_devices[device_name].get(event) != content:
