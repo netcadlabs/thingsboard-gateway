@@ -55,7 +55,7 @@ class OpcUaConnector(Thread, Connector):
         else:
             self.__opcua_url = self.__server_conf.get("url")
         self.client = Client(self.__opcua_url, timeout=self.__server_conf.get("timeoutInMillis", 4000)/1000)
-        if self.__server_conf["identity"]["type"] == "cert.PEM":
+        if self.__server_conf["identity"].get("type") == "cert.PEM": 
             try:
                 ca_cert = self.__server_conf["identity"].get("caCert")
                 private_key = self.__server_conf["identity"].get("privateKey")
@@ -444,37 +444,48 @@ class OpcUaConnector(Thread, Connector):
                 fullpath_pattern = regex.compile(fullpath)
                 full1 = fullpath.replace('\\\\.', '.')
                 for child_node in current_node.get_children():
-                    new_node = self.client.get_node(child_node)
-                    # new_node_path = '\\\\.'.join(char.split(":")[1] for char in new_node.get_path(200000, True))
-                    new_node_path = 'Root.Objects.'+ str(new_node.nodeid.Identifier)
+                    new_node_class = child_node.get_node_class()
+                    #basis Description of node.get_parent() function, sometime child_node.get_parent() return None
+                    new_parent = child_node.get_parent()
+                    if (new_parent is None):
+                        child_node_parent_class = current_node.get_node_class()
+                    else:
+                        child_node_parent_class = child_node.get_parent().get_node_class() 
+                    child_node_parent_class = child_node.get_parent().get_node_class()
+                    current_node_path = '\\.'.join(char.split(":")[1] for char in current_node.get_path(200000, True))
+                    new_node_path = '\\\\.'.join(char.split(":")[1] for char in child_node.get_path(200000, True))
+                    if child_node_parent_class == ua.NodeClass.View and new_parent is not None:
+                        parent_path = '\\.'.join(char.split(":")[1] for char in child_node.get_parent().get_path(200000, True))
+                        fullpath = fullpath.replace(current_node_path, parent_path)
                     nnp1 = new_node_path.replace('\\\\.', '.')
                     nnp2 = new_node_path.replace('\\\\', '\\')
                     if self.__show_map:
                         log.debug("SHOW MAP: Current node path: %s", new_node_path)
                     regex_fullmatch = regex.fullmatch(fullpath_pattern,  nnp1) or \
                                       nnp2 == full1 or \
-                                      nnp2 == fullpath
+                                      nnp2 == fullpath or \
+                                      nnp1 == full1
                     if regex_fullmatch:
                         if self.__show_map:
                             log.debug("SHOW MAP: Current node path: %s - NODE FOUND", nnp2)
-                        result.append(new_node)
+                        result.append(child_node)
                     else:
                         regex_search = fullpath_pattern.fullmatch(nnp1, partial=True) or \
-                                          nnp2 in full1
+                                          nnp2 in full1 or \
+                                          nnp1 in full1
                         if regex_search:
-                            new_node_class = new_node.get_node_class()
                             if self.__show_map:
                                 log.debug("SHOW MAP: Current node path: %s - NODE FOUND", new_node_path)
                             if new_node_class == ua.NodeClass.Object:
                                 if self.__show_map:
                                     log.debug("SHOW MAP: Search in %s", new_node_path)
-                                self.__search_node(new_node, fullpath, result=result)
+                                self.__search_node(child_node, fullpath, result=result)
                             elif new_node_class == ua.NodeClass.Variable:
                                 log.debug("Found in %s", new_node_path)
-                                result.append(new_node)
+                                result.append(child_node)
                             elif new_node_class == ua.NodeClass.Method and search_method:
                                 log.debug("Found in %s", new_node_path)
-                                result.append(new_node)
+                                result.append(child_node)
         except CancelledError:
             log.error("Request during search has been canceled by the OPC-UA server.")
         except BrokenPipeError:
