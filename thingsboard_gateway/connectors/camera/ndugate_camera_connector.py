@@ -105,7 +105,7 @@ class NDUGateCameraConnector(Thread, Connector):
             while True:
                 try:
                     data_part = self.socket.recv_string()
-                    log.info("DELETE data geldi %s", data_part)
+
                     if not data_part:
                         continue
 
@@ -125,7 +125,7 @@ class NDUGateCameraConnector(Thread, Connector):
                         item = {}
                         item[key] = data[key]
                         result_dict['telemetry'].append(item)
-
+                    log.debug("Data %s", result_dict)
                     self.__gateway.send_to_storage(self.get_name(), result_dict)
                     time.sleep(0.1)
                 except Exception as e:

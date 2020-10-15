@@ -1,5 +1,5 @@
 thingsboard:
-  host: demo.thingsboard.io
+  host: smartapp.netcad.com
   port: 1883
   remoteShell: false
   remoteConfiguration: false
@@ -17,9 +17,10 @@ storage:
 #  max_records_per_file: 10000
 connectors:
   -
-    name: MQTT Broker Connector
-    type: mqtt
-    configuration: mqtt.json
+    name: NDU-Gate Camera Connector
+    type: camera
+    configuration: camera.json
+    class: NDUGateCameraConnector
 
 #  -
 #    name: Modbus Connector
