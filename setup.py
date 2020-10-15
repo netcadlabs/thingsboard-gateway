@@ -41,6 +41,7 @@ setup(
               'thingsboard_gateway.connectors.modbus', 'thingsboard_gateway.connectors.can', 'thingsboard_gateway.connectors.bacnet',
               'thingsboard_gateway.connectors.bacnet.bacnet_utilities', 'thingsboard_gateway.connectors.odbc',
               'thingsboard_gateway.connectors.rest', 'thingsboard_gateway.connectors.snmp',
+              'thingsboard_gateway.connectors.camera',
               'thingsboard_gateway.tb_utility', 'thingsboard_gateway.extensions',
               'thingsboard_gateway.extensions.mqtt', 'thingsboard_gateway.extensions.modbus', 'thingsboard_gateway.extensions.opcua',
               'thingsboard_gateway.extensions.ble', 'thingsboard_gateway.extensions.serial', 'thingsboard_gateway.extensions.request',
@@ -54,7 +55,8 @@ setup(
         'paho-mqtt',
         'PyYAML',
         'simplejson',
-        'requests'
+        'requests',
+        'zmq'
     ],
     download_url='https://github.com/netcadlabs/thingsboard-gateway/archive/%s.tar.gz' % VERSION,
     entry_points={
