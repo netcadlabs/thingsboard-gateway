@@ -279,8 +279,14 @@ class TBGatewayService:
                 try:
                     connector_class = TBUtility.check_and_import(connector["type"], self._default_connectors.get(connector["type"], connector.get("class")))
                     self._implemented_connectors[connector["type"]] = connector_class
+                    
                     with open(self._config_dir + connector['configuration'], 'r', encoding="UTF-8") as conf_file:
-                        connector_conf = load(conf_file)
+                        connector_conf = {}
+                        try:
+                            connector_conf = load(conf_file)
+                        except Exception as e:
+                            log.error("Config content is not valid, please fix it. %s - %s", connector["name"], connector['configuration'])
+
                         if not self.connectors_configs.get(connector['type']):
                             self.connectors_configs[connector['type']] = []
                         connector_conf["name"] = connector["name"]
