@@ -291,6 +291,16 @@ class TBGatewayService:
                         except Exception as e:
                             log.error("Config content is not valid, please fix it. %s - %s", connector["name"], connector['configuration'])
 
+                        connector_custom_conf = {}
+                        custom_config_file = self._config_dir + connector['type'] + "_custom.json"
+                        if path.isfile(custom_config_file):
+                            with open(custom_config_file, 'r', encoding="UTF-8") as conf_file:
+                                try:
+                                    connector_custom_conf = load(conf_file)
+                                except Exception as e:
+                                    log.error("Custom config content is not valid. %s - %s", connector["name"], connector['configuration'])
+                                connector_conf["custom_config"] = connector_custom_conf
+
                         if not self.connectors_configs.get(connector['type']):
                             self.connectors_configs[connector['type']] = []
                         connector_conf["name"] = connector["name"]
