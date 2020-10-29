@@ -15,7 +15,7 @@ from thingsboard_gateway.connectors.connector import Connector, log
 
 # TODO - use config
 HOSTNAME = "127.0.0.1"
-PORT = "60600"
+PORT = "60060"
 
 
 def log_exception(e):

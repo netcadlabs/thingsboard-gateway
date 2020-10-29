@@ -26,7 +26,7 @@ VERSION = "2.5.2"
 setup(
     version=VERSION,
     name="thingsboard-gateway",
-    author="THingsboard & Netcad Innovation Labs",
+    author="Thingsboard & Netcad Innovation Labs",
     author_email="info@thingsboard.io",
     license="Apache Software License (Apache Software License 2.0)",
     description="Thingsboard Gateway for IoT devices.",
