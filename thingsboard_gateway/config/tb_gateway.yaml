@@ -16,11 +16,6 @@ storage:
 #  max_read_records_count: 10
 #  max_records_per_file: 10000
 connectors:
-  -
-    name: NDU-Gate Camera Connector
-    type: camera
-    configuration: camera.json
-    class: NDUGateCameraConnector
 
 #  -
 #    name: Modbus Connector

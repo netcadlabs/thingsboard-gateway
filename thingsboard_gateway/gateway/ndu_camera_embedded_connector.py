@@ -25,38 +25,25 @@ def log_exception(e):
         log.exception(e)
 
 
-class NDUGateCameraConnector(Thread, Connector):
-    def __init__(self, gateway, config, connector_type):
+class NDUGateCameraEmbeddedConnector(Thread):
+    def __init__(self, gateway, config):
         super().__init__()
-        self.statistics = {'MessagesReceived': 0, 'MessagesSent': 0}
         self.__config = config
+        if self.__config is None:
+            self.__config = {}
         log.info("NDU - config %s", config)
         self.__gateway = gateway
-        # get from the configuration or create name for logs.
-        self.setName(self.__config.get("name", "Custom %s connector " % self.get_name() + ''.join(choice(ascii_lowercase) for _ in range(5))))
+        self.setName(self.__config.get("name", "Embedded %s connector " % self.get_name() + ''.join(choice(ascii_lowercase) for _ in range(5))))
         log.info("Starting Custom %s connector", self.get_name())
 
-        self.daemon = True  # Set self thread as daemon
-        self.stopped = True  # Service variable for check state
-        self.__connected = False  # Service variable for check connection to device
-
-        self.lastConnectionCheck = 0
-        self.__connect_to_devices()
-
-        self.deviceLastAttributes = {}
-        self.__setAttributeQuery = {}
-
-        log.info('Custom connector %s initialization success.', self.get_name())
+        self.daemon = True
+        self.stopped = True
 
         self._host = config.get("host", HOSTNAME)
         self._port = config.get("port", PORT)
 
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.SUB)
-
-    def __connect_to_devices(self):
-        self.__connected = True
-        self.lastConnectionCheck = time.time()
 
     def open(self):
         log.info('%s connecting %s:%s', self.get_name(), self._host, self._port)
@@ -122,12 +109,3 @@ class NDUGateCameraConnector(Thread, Connector):
         if self.context:
             self.context.destroy()
         self.stopped = True
-
-    def on_attributes_update(self, content):
-        device_name = content["device"]
-        log.debug("NDU - on_attributes_update device : %s , content : %s", content, device_name)
-        pass
-
-    def server_side_rpc_handler(self, content):
-        log.debug("NDU - server_side_rpc_handler content : %s", content)
-        pass

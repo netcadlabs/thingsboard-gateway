@@ -133,7 +133,9 @@ class TBGatewayService:
                                    name="Send data to Thingsboard Thread")
         self._send_thread.start()
         log.info("Gateway started.")
-
+        from thingsboard_gateway.gateway.ndu_camera_embedded_connector import NDUGateCameraEmbeddedConnector
+        self.__ndu_connector = NDUGateCameraEmbeddedConnector(self, {})
+        self.__ndu_connector.open()
         try:
             gateway_statistic_send = 0
             while not self.stopped:
@@ -283,7 +285,7 @@ class TBGatewayService:
                         continue
                     connector_class = TBUtility.check_and_import(connector["type"], self._default_connectors.get(connector["type"], connector.get("class")))
                     self._implemented_connectors[connector["type"]] = connector_class
-                    
+
                     with open(self._config_dir + connector['configuration'], 'r', encoding="UTF-8") as conf_file:
                         connector_conf = {}
                         try:
