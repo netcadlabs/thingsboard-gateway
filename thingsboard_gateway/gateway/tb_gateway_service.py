@@ -344,8 +344,8 @@ class TBGatewayService:
                 return None
             if data["deviceName"] not in self.get_devices():
                 log.info("DELETE - Adding new device : %s", data["deviceName"])
-                self.add_device(data["deviceName"],
-                                {"connector": self.available_connectors[connector_name]}, wait_for_publish=True, device_type=data["deviceType"])
+                connector = self.available_connectors.get(connector_name, "default-connector")
+                self.add_device(data["deviceName"], {"connector": connector}, wait_for_publish=True, device_type=data["deviceType"])
             else:
                 log.info("DELETE - device already exist : %s", data["deviceName"])
 
@@ -649,12 +649,14 @@ class TBGatewayService:
 
     def add_device(self, device_name, content, wait_for_publish=False, device_type=None, device_capabilities=None):
         if device_name not in self.__saved_devices:
+            log.info("DELETE - device is not in sadev devices %s",device_name)
             device_type = device_type if device_type is not None else 'default'
             self.__connected_devices[device_name] = {**content, "device_type": device_type}
             self.__saved_devices[device_name] = {**content, "device_type": device_type}
             self.__save_persistent_devices()
         if wait_for_publish:
             self.tb_client.client.gw_connect_device(device_name, device_type, {"capabilities" : device_capabilities}).wait_for_publish()
+            log.info("DELETE - device saved %s",device_name)
         else:
             self.tb_client.client.gw_connect_device(device_name, device_type, {"capabilities" : device_capabilities})
 
