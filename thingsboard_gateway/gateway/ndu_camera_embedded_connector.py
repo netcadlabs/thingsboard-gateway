@@ -88,8 +88,9 @@ class NDUGateCameraEmbeddedConnector(Thread):
                     if data is None:
                         continue
 
+                    deviceName = self.__gateway.name,
                     if data.get("deviceName") is not None:
-                        deviceName = data.get("deviceName")
+                        deviceName = data.get("deviceName", deviceName)
                         result_dict['deviceName'] = deviceName
 
                     if data.get("telemetry") is not None:
@@ -101,7 +102,7 @@ class NDUGateCameraEmbeddedConnector(Thread):
                         for attr_key in attr_data:
                             result_dict['attributes'].append({attr_key: attr_data[attr_key]})
 
-                    self.__gateway.send_to_storage(self.__gateway.name, result_dict)
+                    self.__gateway.send_to_storage(deviceName, result_dict)
                     time.sleep(0.1)
                 except Exception as e:
                     log_exception(e)
