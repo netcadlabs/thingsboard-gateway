@@ -280,7 +280,7 @@ class TBGatewayService:
         if self.__config.get("connectors"):
             for connector in self.__config['connectors']:
                 try:
-                    if connector.get("status", 1) is 0:
+                    if connector.get("status", 1) == 0:
                         log.debug("connector is not active %s", connector)
                         continue
                     connector_class = TBUtility.check_and_import(connector["type"], self._default_connectors.get(connector["type"], connector.get("class")))
