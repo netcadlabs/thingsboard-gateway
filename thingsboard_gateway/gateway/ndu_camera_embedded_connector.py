@@ -88,6 +88,10 @@ class NDUGateCameraEmbeddedConnector(Thread):
                     if data is None:
                         continue
 
+                    if data.get("deviceName") is not None:
+                        deviceName = data.get("deviceName")
+                        result_dict['deviceName'] = deviceName
+
                     if data.get("telemetry") is not None:
                         telemetry_data = data.get("telemetry")
                         result_dict['telemetry'].append(telemetry_data)
