@@ -88,10 +88,10 @@ class NDUGateCameraEmbeddedConnector(Thread):
                     if data is None:
                         continue
 
-                    deviceName = self.__gateway.name,
-                    if data.get("deviceName") is not None:
-                        deviceName = data.get("deviceName", deviceName)
-                        result_dict['deviceName'] = deviceName
+                    print("DELETE - Device name in data {}",format(data.get("deviceName", "---")))
+
+                    deviceName = data.get("deviceName", self.__gateway.name)
+                    result_dict['deviceName'] = deviceName
 
                     if data.get("telemetry") is not None:
                         telemetry_data = data.get("telemetry")
