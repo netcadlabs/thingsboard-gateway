@@ -48,7 +48,7 @@ class NDUGateCameraEmbeddedConnector(Thread):
     def open(self):
         log.info('%s connecting %s:%s', self.get_name(), self._host, self._port)
         self.stopped = False
-        self.socket.connect("tcp://{}:{}".format(self._host, self._port))
+        self.socket.bind("tcp://{}:{}".format(self._host, self._port))
         topic = self.__config.get("topic", "ndugate")
         self.socket.subscribe(topic)
         self.start()
