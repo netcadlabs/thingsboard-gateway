@@ -707,7 +707,10 @@ class TBGatewayService:
                 data_to_save = {}
                 for device in self.__connected_devices:
                     if self.__connected_devices[device]["connector"] is not None:
-                        data_to_save[device] = self.__connected_devices[device]["connector"].get_name()
+                        if isinstance(self.__connected_devices[device]["connector"], str):
+                            data_to_save[device] = self.__connected_devices[device]["connector"]
+                        else:
+                            data_to_save[device] = self.__connected_devices[device]["connector"].get_name()
                 config_file.write(dumps(data_to_save, indent=2, sort_keys=True))
             except Exception as e:
                 log.exception(e)
