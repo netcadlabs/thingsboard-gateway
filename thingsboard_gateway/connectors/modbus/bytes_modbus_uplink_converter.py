@@ -119,6 +119,9 @@ class BytesModbusUplinkConverter(ModbusConverter):
         if lower_type == "string":
             decoded = decoder_functions[type_](objects_count * 2)
 
+        elif lower_type == "bytes":
+            decoded = decoder_functions[type_](size=objects_count*2)
+
         elif decoder_functions.get(lower_type) is not None:
             decoded = decoder_functions[lower_type]()
 
@@ -145,12 +148,12 @@ class BytesModbusUplinkConverter(ModbusConverter):
         elif isinstance(decoded, bytes) and lower_type == "string":
             result_data = decoded.decode('UTF-8')
         elif isinstance(decoded, bytes) and lower_type == "bytes":
-            result_data = decoded
+            result_data = decoded.hex()
         elif isinstance(decoded, list):
             if configuration.get('bit') is not None:
-                result_data = decoded[configuration['bit']]
+                result_data = int(decoded[configuration['bit']])
             else:
-                result_data = decoded
+                result_data = [int(bit) for bit in decoded]
         elif isinstance(decoded, float):
             result_data = decoded
         elif decoded is not None:
