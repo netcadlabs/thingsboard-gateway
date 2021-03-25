@@ -18,10 +18,10 @@ from setuptools import setup
 from os import path
 
 this_directory = path.abspath(path.dirname(__file__))
-with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+with open(path.join(this_directory, 'README_NDU_GATEWAY.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-VERSION = "2.6"
+VERSION = "2.6.1"
 
 setup(
     version=VERSION,
@@ -30,7 +30,7 @@ setup(
     author_email="netcadinnovationlabs@gmail.com",
     license="Apache Software License (Apache Software License 2.0)",
     description="Thingsboard Gateway for IoT devices. Modified By Netcad for NDU",
-    url="https://github.com/netcadlabs/thingsboard-gateway",
+    url="https://github.com/netcadlabs/ndu-gateway",
     long_description=long_description,
     long_description_content_type="text/markdown",
     include_package_data=True,

@@ -24,7 +24,7 @@ To install from source code, run the following script.
 
 
 ```
- pip install ndu-gateway
+ TODO - 
 ```
 
 Install using pip

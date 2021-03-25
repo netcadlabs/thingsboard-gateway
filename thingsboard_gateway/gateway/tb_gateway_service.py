@@ -53,8 +53,9 @@ DEFAULT_CONNECTORS = {
             "snmp": "SNMPConnector",
         }
 
-class TBGatewayService:
-    def __init__(self, config_file=None):
+class TBGatewayService(Thread):
+    def __init__(self, config_file=None, is_main_thread=True):
+        super().__init__()
         self.stopped = False
         self.__lock = RLock()
         if config_file is None:
@@ -136,6 +137,10 @@ class TBGatewayService:
         from thingsboard_gateway.gateway.ndu_camera_embedded_connector import NDUGateCameraEmbeddedConnector
         self.__ndu_connector = NDUGateCameraEmbeddedConnector(self, {})
         self.__ndu_connector.open()
+        if self.is_main_thread:
+            self.run()
+
+    def run(self):
         try:
             gateway_statistic_send = 0
             while not self.stopped:
