@@ -210,7 +210,7 @@ class TBGatewayService:
             except Exception as e:
                 log.exception(e)
 
-    def __stop_gateway(self):
+    def stop_gateway(self):
         self.stopped = True
         self.__updater.stop()
         log.info("Stopping...")
