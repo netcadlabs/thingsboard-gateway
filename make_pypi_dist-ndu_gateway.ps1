@@ -14,7 +14,7 @@ If ((Test-Path $NDU_GATEWAY_MODULE_NAME) -eq $True){ Remove-Item -Recurse -Path 
 $replaceLsit = @(
     ('from thingsboard_gateway.', 'from ndu_gateway.'),
     ('thingsboard-gateway', 'ndu-gateway'),
-    ('thingsboard_gateway.', 'ndu_gateway.')
+    ('thingsboard_gateway', 'ndu_gateway')
 );
 
 # copy all code to ndu_gateway folder
@@ -25,7 +25,7 @@ Get-ChildItem .\$NDU_GATEWAY_MODULE_NAME -Recurse | foreach {
             $find =  $replaceLsit[$i][0]
             $replace =  $replaceLsit[$i][1]
             Write-Output "Replacing  $find with $replace in $($_.FullName)"
-            ((Get-Content -path $_.FullName -Raw) -replace 'from thingsboard_gateway.','from ndu_gateway.') | Set-Content -Path $_.FullName
+            ((Get-Content -path $_.FullName -Raw) -replace $find, $replace) | Set-Content -Path $_.FullName
         }
     }
 }

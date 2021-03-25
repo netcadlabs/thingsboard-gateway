@@ -56,6 +56,7 @@ DEFAULT_CONNECTORS = {
 class TBGatewayService(Thread):
     def __init__(self, config_file=None, is_main_thread=True):
         super().__init__()
+        self.is_main_thread = is_main_thread
         self.stopped = False
         self.__lock = RLock()
         if config_file is None:
