@@ -35,7 +35,7 @@ from thingsboard_gateway.storage.file_event_storage import FileEventStorage
 from thingsboard_gateway.gateway.tb_gateway_remote_configurator import RemoteConfigurator
 from thingsboard_gateway.gateway.tb_remote_shell import RemoteShell
 
-
+from thingsboard_gateway.gateway.ndu_camera_embedded_connector import NDUGateCameraEmbeddedConnector
 
 log = logging.getLogger('service')
 main_handler = logging.handlers.MemoryHandler(-1)
@@ -135,9 +135,7 @@ class TBGatewayService(Thread):
                                    name="Send data to Thingsboard Thread")
         self._send_thread.start()
         log.info("Gateway started.")
-        from thingsboard_gateway.gateway.ndu_camera_embedded_connector import NDUGateCameraEmbeddedConnector
         self.__ndu_connector = NDUGateCameraEmbeddedConnector(self, {})
-        self.__ndu_connector.open()
         if self.is_main_thread:
             self.run()
 
@@ -290,6 +288,8 @@ class TBGatewayService(Thread):
                         log.debug("connector is not active %s", connector)
                         continue
                     connector_class = TBUtility.check_and_import(connector["type"], self._default_connectors.get(connector["type"], connector.get("class")))
+                    if connector_class is None:
+                        log.warning("Connector implementation is not found for %s", connector['name'])
                     self._implemented_connectors[connector["type"]] = connector_class
 
                     with open(self._config_dir + connector['configuration'], 'r', encoding="UTF-8") as conf_file:
@@ -329,8 +329,8 @@ class TBGatewayService(Thread):
                     try:
                         if connector_config["config"][config] is not None:
                             if self._implemented_connectors[connector_type]:
-                                connector = self._implemented_connectors[connector_type](self, connector_config["config"][config],
-                                                                                        connector_type)
+                                config = connector_config["config"][config]
+                                connector = self._implemented_connectors[connector_type](self, config, connector_type)
                                 connector.setName(connector_config["name"])
                                 self.available_connectors[connector.get_name()] = connector
                                 connector.open()
@@ -629,7 +629,11 @@ class TBGatewayService(Thread):
         log.debug(args)
         if content.get('device') is not None:
             try:
-                self.__connected_devices[content["device"]]["connector"].on_attributes_update(content)
+                device = content["device"]
+                if device is not None and self.__connected_devices[device] is not None:
+                    self.__connected_devices[device]["connector"].on_attributes_update(content)
+                else:
+                    log.warning('Device is not connected, cant send attr update to its connector %s', device)
             except Exception as e:
                 log.exception(e)
         else:
@@ -655,16 +659,16 @@ class TBGatewayService(Thread):
 
     def add_device(self, device_name, content, wait_for_publish=False, device_type=None, device_capabilities=None):
         if device_name not in self.__saved_devices:
-            log.info("DELETE - device is not in sadev devices %s",device_name)
+            log.debug("NDU - device is not in saved devices %s", device_name)
             device_type = device_type if device_type is not None else 'default'
             self.__connected_devices[device_name] = {**content, "device_type": device_type}
             self.__saved_devices[device_name] = {**content, "device_type": device_type}
             self.__save_persistent_devices()
         if wait_for_publish:
-            self.tb_client.client.gw_connect_device(device_name, device_type, {"capabilities" : device_capabilities}).wait_for_publish()
-            log.info("DELETE - device saved %s",device_name)
+            self.tb_client.client.gw_connect_device(device_name, device_type, {"capabilities": device_capabilities}).wait_for_publish()
+            log.debug("NDU - device saved %s", device_name)
         else:
-            self.tb_client.client.gw_connect_device(device_name, device_type, {"capabilities" : device_capabilities})
+            self.tb_client.client.gw_connect_device(device_name, device_type, {"capabilities": device_capabilities})
 
     def update_device(self, device_name, event, content):
         if event == 'connector' and self.__connected_devices[device_name].get(event) != content:

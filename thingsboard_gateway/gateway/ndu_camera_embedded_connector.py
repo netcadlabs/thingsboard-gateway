@@ -26,12 +26,13 @@ def log_exception(e):
 
 
 class NDUGateCameraEmbeddedConnector(Thread):
-    def __init__(self, gateway, config):
+    def __init__(self, gateway, config={}, stopped=False):
         super().__init__()
+        self.setName('NDU-Gate Camera Embedded Connector Thread')
         self.__config = config
         if self.__config is None:
             self.__config = {}
-        log.info("NDU - config %s", config)
+        log.debug("NDUGateCameraEmbeddedConnector - config %s", config)
         self.__gateway = gateway
         self.setName(self.__config.get("name", "Embedded %s connector " % self.get_name() + ''.join(choice(ascii_lowercase) for _ in range(5))))
         log.info("Starting Custom %s connector", self.get_name())
@@ -44,9 +45,11 @@ class NDUGateCameraEmbeddedConnector(Thread):
 
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.SUB)
+        if not stopped:
+            self.open()
 
     def open(self):
-        log.info('%s connecting %s:%s', self.get_name(), self._host, self._port)
+        log.debug('%s connecting %s:%s', self.get_name(), self._host, self._port)
         self.stopped = False
         self.socket.bind("tcp://{}:{}".format(self._host, self._port))
         topic = self.__config.get("topic", "ndugate")
