@@ -32,7 +32,7 @@ class NDUGateCameraEmbeddedConnector(Thread):
         self.__config = config
         if self.__config is None:
             self.__config = {}
-        log.debug("NDUGateCameraEmbeddedConnector - config %s", config)
+        log.info("NDUGateCameraEmbeddedConnector - config %s", config)
         self.__gateway = gateway
         self.setName(self.__config.get("name", "Embedded %s connector " % self.get_name() + ''.join(choice(ascii_lowercase) for _ in range(5))))
         log.info("Starting Custom %s connector", self.get_name())
@@ -90,8 +90,6 @@ class NDUGateCameraEmbeddedConnector(Thread):
 
                     if data is None:
                         continue
-
-                    print("DELETE - Device name in data {}".format(data.get("deviceName", "---")))
 
                     deviceName = data.get("deviceName", self.__gateway.name)
                     result_dict['deviceName'] = deviceName
