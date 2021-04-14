@@ -349,18 +349,18 @@ class TBGatewayService(Thread):
                 log.error("Data from %s connector is invalid.", connector_name)
                 return None
             if data["deviceName"] not in self.get_devices():
-                log.info("DELETE - Adding new device : %s", data["deviceName"])
+                log.info("Adding new device : %s", data["deviceName"])
                 connector = self.available_connectors.get(connector_name, "default-connector")
                 self.add_device(data["deviceName"], {"connector": connector}, wait_for_publish=True, device_type=data["deviceType"])
             else:
-                log.info("DELETE - device already exist : %s", data["deviceName"])
+                log.debug("Device already exist : %s", data["deviceName"])
 
             if not self.__connector_incoming_messages.get(connector_name):
                 self.__connector_incoming_messages[connector_name] = 0
             else:
                 self.__connector_incoming_messages[connector_name] += 1
         else:
-            log.info("DELETE - currentThingsBoardGateway %s", connector_name)
+            log.debug("currentThingsBoardGateway %s", connector_name)
             data["deviceName"] = "currentThingsBoardGateway"
 
         telemetry = {}
