@@ -71,12 +71,12 @@ class TBGatewayService(Thread):
             logging_error = e
         global log
         log = logging.getLogger('service')
-        log.info("Gateway starting...")
+        log.info("Gateway starting with %s", config_file)
         self.__updater = TBUpdater()
         self.__updates_check_period_ms = 300000
         self.__updates_check_time = 0
         self.version = self.__updater.get_version()
-        log.info("ThingsBoard IoT gateway version: %s", self.version["current_version"])
+        log.info("NDU IoT gateway version: %s", self.version["current_version"])
         self.available_connectors = {}
         self.__connector_incoming_messages = {}
         self.__connected_devices = {}

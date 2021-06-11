@@ -21,7 +21,7 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README_NDU_GATEWAY.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-VERSION = "2.6.4"
+VERSION = "2.6.6"
 
 setup(
     version=VERSION,

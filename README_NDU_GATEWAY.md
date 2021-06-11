@@ -22,9 +22,8 @@ Publish ndu-gateway module (use netcadlabs pypi credentials)
 
 To install from source code, run the following script.
 
-
 ```
- TODO - 
+ pip install ./dist/ndu_gateway-<VERSION>.whl
 ```
 
 Install using pip
@@ -32,6 +31,16 @@ Install using pip
 ```
  pip install ndu-gateway
 ```
+
+
+
+## Running
+
+``` python -c "from ndu_gateway.tb_gateway import daemon; daemon()" ```
+
+or 
+
+``` ndu-gateway -c custom_config_path_.yml ```
 
 ## Licenses
 

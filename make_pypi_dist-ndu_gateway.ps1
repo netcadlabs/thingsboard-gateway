@@ -38,3 +38,6 @@ python setup_ndu_gateway.py sdist bdist_wheel
 
 # uploading dist
 # python -m twine upload dist/*
+
+# installing created whl file
+# pip install ./dist/ndu_gateway-<VERSION>.whl
