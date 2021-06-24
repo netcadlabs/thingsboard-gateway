@@ -48,9 +48,9 @@ def _get_config():
     if tb_gateway_config_file is None:
         print("Config file not specified, going to use default")
         if platform == "win32":
-            tb_gateway_config_file = DEFAULT_TB_GATEWAY_CONF.replace('/', path.sep)
-        else:
             tb_gateway_config_file = DEFAULT_TB_GATEWAY_CONF_WIN.replace('/', path.sep)
+        else:
+            tb_gateway_config_file = DEFAULT_TB_GATEWAY_CONF.replace('/', path.sep)
 
     print("Config file is {}".format(tb_gateway_config_file))
 
