@@ -1,4 +1,4 @@
-#     Copyright 2020. ThingsBoard
+#     Copyright 2021. ThingsBoard
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -13,22 +13,14 @@
 #     limitations under the License.
 
 from re import search
-from os import path, listdir
-from inspect import getmembers, isclass
-from importlib import util
 from logging import getLogger
 from simplejson import dumps, loads, JSONDecodeError
 from jsonpath_rw import parse
-from platform import system
 
 log = getLogger("service")
 
 
 class TBUtility:
-    # Buffer for connectors/converters
-    # key - class name
-    # value - loaded class
-    loaded_extensions = {}
 
     @staticmethod
     def decode(message):
@@ -51,8 +43,23 @@ class TBUtility:
             error = 'deviceName is empty in data: '
         if error is None and not data.get("deviceType"):
             error = 'deviceType is empty in data: '
-        if error is None and not data.get("attributes") and not data.get("telemetry"):
-            error = 'No telemetry and attributes in data: '
+
+        if error is None:
+            got_attributes = False
+            got_telemetry = False
+
+            if data.get("attributes") is not None and len(data.get("attributes")) > 0:
+                got_attributes = True
+
+            if data.get("telemetry") is not None:
+                for entry in data.get("telemetry"):
+                    if entry.get("ts") is not None and len(entry.get("values")) > 0:
+                        got_telemetry = True
+                        break
+
+            if got_attributes is False and got_telemetry is False:
+                error = 'No telemetry and attributes in data: '
+
         if error is not None:
             json_data = dumps(data)
             if isinstance(json_data, bytes):
@@ -69,59 +76,6 @@ class TBUtility:
     @staticmethod
     def regex_to_topic(regex):
         return regex.replace("[^/]+", "+").replace(".+", "#")
-
-    @staticmethod
-    def check_and_import(extension_type, module_name):
-        if TBUtility.loaded_extensions.get(extension_type + module_name) is None:
-            if system() == "Windows":
-                extensions_paths = [path.abspath(path.dirname(path.dirname(__file__)) + '/connectors/'.replace('/',
-                                                                                                               path.sep) + extension_type.lower()),
-                                    path.abspath(path.dirname(path.dirname(__file__)) + '/extensions/'.replace('/',
-                                                                                                               path.sep) + extension_type.lower())]
-            else:
-                extensions_paths = [path.abspath(path.dirname(path.dirname(__file__)) + '/connectors/'.replace('/',
-                                                                                                               path.sep) + extension_type.lower())]
-                extension_folder_path = '/var/lib/thingsboard_gateway/extensions/'.replace('/',
-                                                                                           path.sep) + extension_type.lower()
-                if path.exists(extension_folder_path):
-                    extensions_paths.append(extension_folder_path)
-                extensions_paths.append(path.abspath(path.dirname(path.dirname(__file__)) + '/extensions/'.replace('/',
-                                                                                                                   path.sep) + extension_type.lower()))
-            try:
-                for extension_path in extensions_paths:
-                    if TBUtility.loaded_extensions.get(extension_type + module_name) is not None:
-                        return TBUtility.loaded_extensions[extension_type + module_name]
-                    if path.exists(extension_path):
-                        for file in listdir(extension_path):
-                            if not file.startswith('__') and file.endswith('.py'):
-                                try:
-                                    module_spec = util.spec_from_file_location(module_name,
-                                                                               extension_path + path.sep + file)
-                                    log.debug(module_spec)
-
-                                    if module_spec is None:
-                                        log.error('Module: %s not found', module_name)
-                                        continue
-
-                                    module = util.module_from_spec(module_spec)
-                                    log.debug(str(module))
-                                    module_spec.loader.exec_module(module)
-                                    for extension_class in getmembers(module, isclass):
-                                        if module_name in extension_class:
-                                            log.info("Import %s from %s.", module_name, extension_path)
-                                            # Save class into buffer
-                                            TBUtility.loaded_extensions[extension_type + module_name] = extension_class[
-                                                1]
-                                            return extension_class[1]
-                                except ImportError:
-                                    continue
-                    else:
-                        log.debug("Import %s failed, path %s doesn't exist", module_name, extension_path)
-            except Exception as e:
-                log.exception(e)
-        else:
-            log.debug("Class %s found in TBUtility buffer.", module_name)
-            return TBUtility.loaded_extensions[extension_type + module_name]
 
     @staticmethod
     def get_value(expression, body=None, value_type="string", get_tag=False, expression_instead_none=False):
@@ -143,9 +97,7 @@ class TBUtility:
         try:
             if isinstance(body, dict) and target_str.split()[0] in body:
                 if value_type.lower() == "string":
-                    full_value = expression[0: max(abs(p1 - 2), 0)] + body[target_str.split()[0]] + expression[
-                                                                                                    p2 + 1:len(
-                                                                                                        expression)]
+                    full_value = expression[0: max(abs(p1 - 2), 0)] + body[target_str.split()[0]] + expression[p2 + 1:len(expression)]
                 else:
                     full_value = body.get(target_str.split()[0])
             elif isinstance(body, (dict, list)):

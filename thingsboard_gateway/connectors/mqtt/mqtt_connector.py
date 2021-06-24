@@ -1,4 +1,4 @@
-#     Copyright 2020. ThingsBoard
+#     Copyright 2021. ThingsBoard
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -20,8 +20,10 @@ from threading import Thread
 from re import match, fullmatch, search
 import ssl
 from paho.mqtt.client import Client
-from thingsboard_gateway.connectors.connector import Connector, log
+
+from thingsboard_gateway.tb_utility.tb_loader import TBModuleLoader
 from thingsboard_gateway.tb_utility.tb_utility import TBUtility
+from thingsboard_gateway.connectors.connector import Connector, log
 
 
 class MqttConnector(Connector, Thread):
@@ -53,7 +55,7 @@ class MqttConnector(Connector, Thread):
             "disconnectRequests": ['topicFilter'],
             "attributeRequests": ['topicFilter', 'topicExpression', 'valueExpression'],
             "attributeUpdates": ['deviceNameFilter', 'attributeFilter', 'topicExpression', 'valueExpression']
-        }
+            }
 
         # Mappings, i.e., telemetry/attributes-push handlers provided by user via configuration file
         self.load_handlers('mapping', mandatory_keys['mapping'], self.__mapping)
@@ -223,7 +225,7 @@ class MqttConnector(Connector, Thread):
             3: "server unavailable",
             4: "bad username or password",
             5: "not authorised",
-        }
+            }
 
         if result_code == 0:
             self._connected = True
@@ -249,7 +251,7 @@ class MqttConnector(Connector, Thread):
                     # Get converter class from "extension" parameter or default converter
                     converter_class_name = mapping["converter"].get("extension", default_converter_class_name)
                     # Find and load required class
-                    module = TBUtility.check_and_import(self._connector_type, converter_class_name)
+                    module = TBModuleLoader.import_module(self._connector_type, converter_class_name)
                     if module:
                         self.__log.debug('Converter %s for topic %s - found!', converter_class_name, mapping["topicFilter"])
                         converter = module(mapping)
@@ -310,7 +312,8 @@ class MqttConnector(Connector, Thread):
     def _on_log(self, *args):
         self.__log.debug(args)
 
-    def _on_subscribe(self, _, __, mid, granted_qos):
+    def _on_subscribe(self, _, __, mid, granted_qos, *args):
+        log.info(args)
         try:
             if granted_qos[0] == 128:
                 self.__log.error('"%s" subscription failed to topic %s subscription message id = %i',
@@ -500,7 +503,9 @@ class MqttConnector(Connector, Thread):
 
         # Check if message topic exists in RPC handlers ----------------------------------------------------------------
         # The gateway is expecting for this message => no wildcards here, the topic must be evaluated as is
-        if message.topic in self.__gateway.rpc_requests_in_progress:
+
+        if self.__gateway.is_rpc_in_progress(message.topic):
+            log.info("RPC response arrived. Forwarding it to thingsboard.")
             self.__gateway.rpc_with_reply_processing(message.topic, content)
             return None
 
@@ -572,7 +577,7 @@ class MqttConnector(Connector, Thread):
                                                                     topic_for_subscribe,
                                                                     self.rpc_cancel_processing)
                         # Maybe we need to wait for the command to execute successfully before publishing the request.
-                        self._client.subscribe(topic_for_subscribe)
+                        self.__subscribe(topic_for_subscribe,  rpc_config.get("responseTopicQoS", 1))
                     else:
                         self.__log.error("Not found RPC response timeout in config, sending without waiting for response")
                 # Publish RPC request
@@ -599,5 +604,6 @@ class MqttConnector(Connector, Thread):
                         self.__log.exception(e)
 
     def rpc_cancel_processing(self, topic):
+        log.info("RPC canceled or terminated. Unsubscribing from %s", topic)
         self._client.unsubscribe(topic)
 

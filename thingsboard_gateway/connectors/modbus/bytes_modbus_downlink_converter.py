@@ -1,4 +1,4 @@
-#     Copyright 2020. ThingsBoard
+#     Copyright 2021. ThingsBoard
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ class BytesModbusDownlinkConverter(ModbusConverter):
         if data.get("data") and data["data"].get("params") is not None:
             value = data["data"]["params"]
         else:
-            value = config["value"]
+            value = config.get("value", 0)
         lower_type = config.get("type", config.get("tag", "error")).lower()
         if lower_type == "error":
             log.error('"type" and "tag" - not found in configuration.')

@@ -1,4 +1,4 @@
-#     Copyright 2020. ThingsBoard
+#     Copyright 2021. ThingsBoard
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ from random import choice
 from string import ascii_lowercase
 
 from thingsboard_gateway.tb_utility.tb_utility import TBUtility
+from thingsboard_gateway.tb_utility.tb_loader import TBModuleLoader
 
 try:
     from can import Notifier, BufferedReader, Message, CanError, ThreadSafeBus
@@ -579,11 +580,11 @@ class CanConnector(Connector, Thread):
             if need_uplink:
                 uplink = config.get("uplink")
                 return BytesCanUplinkConverter() if uplink is None \
-                    else TBUtility.check_and_import(self.__connector_type, uplink)
+                    else TBModuleLoader.import_module(self.__connector_type, uplink)
             else:
                 downlink = config.get("downlink")
                 return BytesCanDownlinkConverter() if downlink is None \
-                    else TBUtility.check_and_import(self.__connector_type, downlink)
+                    else TBModuleLoader.import_module(self.__connector_type, downlink)
 
 
 class Poller(Thread):

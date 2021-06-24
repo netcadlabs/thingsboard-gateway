@@ -1,4 +1,4 @@
-#     Copyright 2020. ThingsBoard
+#     Copyright 2021. ThingsBoard
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ from yaml import safe_dump
 from configparser import ConfigParser
 
 from thingsboard_gateway.gateway.tb_client import TBClient
-from thingsboard_gateway.tb_utility.tb_utility import TBUtility
-from thingsboard_gateway.gateway.tb_logger import TBLoggerHandler
+from thingsboard_gateway.tb_utility.tb_loader import TBModuleLoader
+from thingsboard_gateway.tb_utility.tb_logger import TBLoggerHandler
 
 # pylint: disable=protected-access
 LOG = getLogger("service")
@@ -137,7 +137,7 @@ class RemoteConfigurator:
                             self.__gateway.connectors_configs[connector['type']] = []
                         self.__gateway.connectors_configs[connector['type']].append(
                             {"name": connector["name"], "config": {connector['configuration']: input_connector["config"]}})
-                        connector_class = TBUtility.check_and_import(connector["type"], self.__gateway._default_connectors.get(connector["type"], connector.get("class")))
+                        connector_class = TBModuleLoader.import_module(connector["type"], self.__gateway._default_connectors.get(connector["type"], connector.get("class")))
                         self.__gateway._implemented_connectors[connector["type"]] = connector_class
         except Exception as e:
             LOG.exception(e)
