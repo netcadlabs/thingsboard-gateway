@@ -14,7 +14,8 @@ If ((Test-Path $NDU_GATEWAY_MODULE_NAME) -eq $True){ Remove-Item -Recurse -Path 
 $replaceLsit = @(
     ('from thingsboard_gateway.', 'from ndu_gateway.'),
     ('thingsboard-gateway', 'ndu-gateway'),
-    ('thingsboard_gateway', 'ndu_gateway')
+    ('thingsboard_gateway', 'ndu_gateway'),
+    (' ThingsBoard', ' ThingsBoard & Netcad Innovation Labs')
 );
 
 # copy all code to ndu_gateway folder

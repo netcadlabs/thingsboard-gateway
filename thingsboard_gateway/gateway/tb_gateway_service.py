@@ -586,7 +586,7 @@ class TBGatewayService(Thread):
                 except Exception as e:
                     log.error("Custom config content is not valid. %s - %s", connector["name"], connector['configuration'])
 
-       return connector_custom_conf
+        return connector_custom_conf
 
     @staticmethod
     def __rpc_ping(*args):
